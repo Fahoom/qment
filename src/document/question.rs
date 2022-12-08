@@ -1,5 +1,8 @@
 use std::collections::{HashMap, hash_map, HashSet};
+use serde::{Serialize, Deserialize};
 
+
+#[derive(Serialize, Deserialize)]
 pub struct Question {
     groups: HashMap<String, HashSet<String>>,
     sections: HashMap<String, Section>
@@ -53,7 +56,7 @@ impl Default for Question {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Serialize, Deserialize)]
 pub struct Section {
     text: Option<String>
 }

@@ -1,8 +1,10 @@
 use std::collections::{BTreeMap, btree_map};
 use self::question::Question;
+use serde::{Serialize, Deserialize};
 
 mod question;
 
+#[derive(Serialize, Deserialize)]
 pub struct Document {
     questions: BTreeMap<u32, Question>
 }
