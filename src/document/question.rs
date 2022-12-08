@@ -1,18 +1,19 @@
 use std::collections::{HashMap, hash_map, HashSet};
+use indexmap::IndexMap;
 use serde::{Serialize, Deserialize};
 
 
 #[derive(Serialize, Deserialize)]
 pub struct Question {
     groups: HashMap<String, HashSet<String>>,
-    sections: HashMap<String, Section>
+    sections: IndexMap<String, Section>
 }
 
 impl Question {
     pub fn new() -> Self {
         Self {
             groups: HashMap::new(),
-            sections: HashMap::new()
+            sections: IndexMap::new()
         }
     }
 
@@ -32,7 +33,7 @@ impl Question {
         self.groups.contains_key(name);
     }
 
-    pub fn sections(&self) -> hash_map::Iter<String, Section> {
+    pub fn sections(&self) -> indexmap::map::Iter<String, Section> {
         self.sections.iter()
     }
 
@@ -51,7 +52,7 @@ impl Question {
 
 impl Default for Question {
     fn default() -> Self {
-        let mut sections = HashMap::new();
+        let mut sections = IndexMap::new();
 
         sections.insert("Question".into(), Section::default());
         sections.insert("Mark Scheme".into(), Section::default());

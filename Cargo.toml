@@ -13,3 +13,6 @@ serde_json = "*"
 
 # File Handling
 rfd = "0.10.0"
+
+# Datatypes
+indexmap = { version = "1.9.2", features = ["serde"] }
