@@ -25,11 +25,11 @@ impl Question {
     }
 
     pub fn remove_group(&mut self, name: &str) {
-        self.groups.remove(name.into());
+        self.groups.remove(name);
     }
 
     pub fn has_group(&mut self, name: &str) {
-        self.groups.contains_key(name.into());
+        self.groups.contains_key(name);
     }
 
     pub fn sections(&self) -> hash_map::Iter<String, Section> {
@@ -37,7 +37,7 @@ impl Question {
     }
 
     pub fn get_section_mut(&mut self, name: &str) -> Option<&mut Section> {
-        self.sections.get_mut(name.into())
+        self.sections.get_mut(name)
     }
 
     pub fn add_section(&mut self, name: &str) {
@@ -45,7 +45,7 @@ impl Question {
     }
 
     pub fn remove_section(&mut self, name: &str) {
-        self.sections.remove(name.into());
+        self.sections.remove(name);
     }
 }
 

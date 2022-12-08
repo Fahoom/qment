@@ -8,7 +8,7 @@ pub struct Editor {
 }
 
 impl Editor {
-    pub fn new(document: Document) -> Self {
+    pub const fn new(document: Document) -> Self {
         Self {
             document,
             current_question: None, 
@@ -45,9 +45,8 @@ impl Editor {
                 }
 
                 // Ghost Rendering
-                match &mut self.ghost_state {
-                    GhostState::Sidebar(text) => {
-                        let resp = ui.add(TextEdit::singleline(text));
+                if let GhostState::Sidebar(text) = &mut self.ghost_state {
+                    let resp = ui.add(TextEdit::singleline(text));
 
                         if resp.lost_focus() || ui.input().key_pressed(Key::Escape) {
                             if let Ok(num) = text.parse::<u32>() {
@@ -59,10 +58,8 @@ impl Editor {
 
                         // Request after, otherwise we will never lose focus!
                         resp.request_focus();
-                    }
-
-                    _ => {}
                 }
+
             });
         });
     }

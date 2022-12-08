@@ -10,7 +10,7 @@ pub struct App {
 }
 
 impl App {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             editor: None
         }
@@ -43,12 +43,12 @@ impl App {
         }
     }
 
-
+    // TODO
     fn handle_shortcuts(&mut self, ctx: &Context) {}
 }
 
 impl eframe::App for App  {
-    fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
+    fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
         egui::TopBottomPanel::top("MenuBar").show(ctx, |ui| egui::menu::bar(ui, |ui| self.draw_menubar(ui)));
         egui::TopBottomPanel::bottom("StatusBar").show(ctx, |ui| self.draw_statusbar(ui));
         egui::CentralPanel::default().show(ctx, |ui| self.draw_content(ui));
