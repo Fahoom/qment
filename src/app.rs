@@ -1,15 +1,48 @@
 use eframe::{self, egui::{Ui, Context, self}};
+use crate::document::Document;
 
-pub struct App {}
+use self::editor::Editor;
+
+mod editor;
+
+pub struct App {
+    editor: Option<Editor>
+}
 
 impl App {
     pub fn new() -> Self {
-        Self {}
+        Self {
+            editor: None
+        }
     }
 
-    fn draw_content(&mut self, ui: &mut Ui) {}
-    fn draw_menubar(&mut self, ui: &mut Ui) {}
+    fn draw_content(&mut self, ui: &mut Ui) {
+        if let Some(editor) = &mut self.editor {
+            editor.draw(ui);
+        } else {
+            ui.centered_and_justified(|ui| ui.heading("No Project Open"));
+        }
+    }
+
+    fn draw_menubar(&mut self, ui: &mut Ui) {
+        ui.menu_button("File", |ui| {
+            if ui.button("New Project").clicked() {
+                self.new_project()
+            }
+        });
+    }
+
     fn draw_statusbar(&mut self, ui: &mut Ui) {}
+
+    pub fn new_project(&mut self) {
+        if let Some(_) = rfd::FileDialog::new()
+            .add_filter("JSON", &["json"])
+            .save_file()
+        {
+            self.editor = Some(Editor::new(Document::new()));
+        }
+    }
+
 
     fn handle_shortcuts(&mut self, ctx: &Context) {}
 }

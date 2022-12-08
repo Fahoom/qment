@@ -10,3 +10,6 @@ eframe = "0.19.0"
 # Serialisation
 serde = { version = "1.0.148", features = ["derive"] }
 serde_json = "*"
+
+# File Handling
+rfd = "0.10.0"

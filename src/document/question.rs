@@ -32,6 +32,10 @@ impl Question {
         self.groups.contains_key(name.into());
     }
 
+    pub fn sections(&self) -> hash_map::Iter<String, Section> {
+        self.sections.iter()
+    }
+
     pub fn get_section_mut(&mut self, name: &str) -> Option<&mut Section> {
         self.sections.get_mut(name.into())
     }
