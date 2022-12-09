@@ -4,6 +4,7 @@ use eframe::egui::{CentralPanel, Key, SidePanel, TextEdit, TopBottomPanel, Ui};
 pub struct Editor {
     document: Document,
     current_question: Option<u32>,
+    current_section: Option<String>,
     ghost_state: GhostState,
 }
 
@@ -12,6 +13,7 @@ impl Editor {
         Self {
             document,
             current_question: None,
+            current_section: None,
             ghost_state: GhostState::Empty,
         }
     }
@@ -59,9 +61,22 @@ impl Editor {
 
         ui.horizontal(|ui| {
             for (name, _) in question.sections() {
-                ui.button(name);
+                if ui.button(name).clicked() {
+                    self.current_section = Some(name.into());
+                }
             }
         });
+
+        let Some(section_name) = &self.current_section else { return; };
+        let Some(section) = question.get_section_mut(section_name) else { return; };
+
+        if let Some(text) = &mut section.text {
+            ui.add(TextEdit::multiline(text));
+        } else {
+            if ui.button("Add Text").clicked() {
+                section.text = Some(String::new());
+            }
+        }
     }
 
     pub fn draw_sidebar(&mut self, ui: &mut Ui) {

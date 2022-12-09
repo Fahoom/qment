@@ -65,5 +65,5 @@ impl Default for Question {
 
 #[derive(Default, Serialize, Deserialize)]
 pub struct Section {
-    text: Option<String>,
+    pub text: Option<String>,
 }
