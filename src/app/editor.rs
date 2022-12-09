@@ -1,17 +1,22 @@
+use std::path::PathBuf;
+
 use crate::document::Document;
 use eframe::egui::{CentralPanel, Key, SidePanel, TextEdit, TopBottomPanel, Ui};
 
 pub struct Editor {
-    document: Document,
+    pub document: Document,
+    pub path: PathBuf,
+
     current_question: Option<u32>,
     current_section: Option<String>,
     ghost_state: GhostState,
 }
 
 impl Editor {
-    pub const fn new(document: Document) -> Self {
+    pub const fn new(document: Document, path: PathBuf) -> Self {
         Self {
             document,
+            path,
             current_question: None,
             current_section: None,
             ghost_state: GhostState::Empty,

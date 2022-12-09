@@ -30,17 +30,46 @@ impl App {
             if ui.button("New Project").clicked() {
                 self.new_project()
             }
+
+            if ui.button("Open Project").clicked() {
+                self.open_project()
+            }
+
+            if ui.button("Save").clicked() {
+                self.save()
+            }
         });
     }
 
     fn draw_statusbar(&mut self, ui: &mut Ui) {}
 
     pub fn new_project(&mut self) {
-        if let Some(_) = rfd::FileDialog::new()
+        if let Some(file_path) = rfd::FileDialog::new()
             .add_filter("JSON", &["json"])
             .save_file()
         {
-            self.editor = Some(Editor::new(Document::new()));
+            self.editor = Some(Editor::new(Document::new(), file_path));
+        }
+    }
+
+    pub fn open_project(&mut self) {
+        if let Some(file_path) = rfd::FileDialog::new()
+            .add_filter("JSON", &["json"])
+            .pick_file()
+        {
+            if let Ok(text) = std::fs::read_to_string(&file_path) {
+                if let Ok(document) = serde_json::from_str::<Document>(&text) {
+                    self.editor = Some(Editor::new(document, file_path));
+                }
+            }
+        }
+    }
+
+    pub fn save(&mut self) {
+        if let Some(editor) = &self.editor {
+            if let Ok(file) = std::fs::File::create(&editor.path) {
+                let Ok(json) = serde_json::to_writer_pretty(file, &editor.document) else { return; };
+            }
         }
     }
 
