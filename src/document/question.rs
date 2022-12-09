@@ -1,26 +1,25 @@
-use std::collections::{HashMap, hash_map, HashSet};
 use indexmap::IndexMap;
-use serde::{Serialize, Deserialize};
-
+use serde::{Deserialize, Serialize};
+use std::collections::{hash_map, HashMap, HashSet};
 
 #[derive(Serialize, Deserialize)]
 pub struct Question {
     groups: HashMap<String, HashSet<String>>,
-    sections: IndexMap<String, Section>
+    sections: IndexMap<String, Section>,
 }
 
 impl Question {
     pub fn new() -> Self {
         Self {
             groups: HashMap::new(),
-            sections: IndexMap::new()
+            sections: IndexMap::new(),
         }
     }
 
     pub fn groups_mut(&mut self) -> hash_map::IterMut<String, HashSet<String>> {
         self.groups.iter_mut()
     }
-    
+
     pub fn add_group(&mut self, name: &str) {
         self.groups.insert(name.into(), HashSet::new());
     }
@@ -29,8 +28,8 @@ impl Question {
         self.groups.remove(name);
     }
 
-    pub fn has_group(&mut self, name: &str) {
-        self.groups.contains_key(name);
+    pub fn has_group(&mut self, name: &str) -> bool {
+        self.groups.contains_key(name)
     }
 
     pub fn sections(&self) -> indexmap::map::Iter<String, Section> {
@@ -57,11 +56,14 @@ impl Default for Question {
         sections.insert("Question".into(), Section::default());
         sections.insert("Mark Scheme".into(), Section::default());
 
-        Self { groups: Default::default(), sections }
+        Self {
+            groups: Default::default(),
+            sections,
+        }
     }
 }
 
 #[derive(Default, Serialize, Deserialize)]
 pub struct Section {
-    text: Option<String>
+    text: Option<String>,
 }

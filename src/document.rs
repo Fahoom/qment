@@ -1,18 +1,18 @@
-use std::collections::{BTreeMap, btree_map};
 use self::question::Question;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use std::collections::{btree_map, BTreeMap};
 
 mod question;
 
 #[derive(Serialize, Deserialize)]
 pub struct Document {
-    questions: BTreeMap<u32, Question>
+    questions: BTreeMap<u32, Question>,
 }
 
 impl Document {
     pub fn new() -> Self {
         Self {
-            questions: BTreeMap::new()
+            questions: BTreeMap::new(),
         }
     }
 

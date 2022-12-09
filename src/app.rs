@@ -1,19 +1,20 @@
-use eframe::{self, egui::{Ui, Context, self}};
 use crate::document::Document;
+use eframe::{
+    self,
+    egui::{self, Context, Ui},
+};
 
 use self::editor::Editor;
 
 mod editor;
 
 pub struct App {
-    editor: Option<Editor>
+    editor: Option<Editor>,
 }
 
 impl App {
     pub const fn new() -> Self {
-        Self {
-            editor: None
-        }
+        Self { editor: None }
     }
 
     fn draw_content(&mut self, ui: &mut Ui) {
@@ -47,12 +48,13 @@ impl App {
     fn handle_shortcuts(&mut self, ctx: &Context) {}
 }
 
-impl eframe::App for App  {
+impl eframe::App for App {
     fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
-        egui::TopBottomPanel::top("MenuBar").show(ctx, |ui| egui::menu::bar(ui, |ui| self.draw_menubar(ui)));
+        egui::TopBottomPanel::top("MenuBar")
+            .show(ctx, |ui| egui::menu::bar(ui, |ui| self.draw_menubar(ui)));
         egui::TopBottomPanel::bottom("StatusBar").show(ctx, |ui| self.draw_statusbar(ui));
         egui::CentralPanel::default().show(ctx, |ui| self.draw_content(ui));
-        
+
         self.handle_shortcuts(ctx);
     }
 }

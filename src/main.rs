@@ -1,5 +1,5 @@
-mod document;
 mod app;
+mod document;
 
 fn main() {
     let options = eframe::NativeOptions::default();
