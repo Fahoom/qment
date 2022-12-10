@@ -1,6 +1,6 @@
 use indexmap::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};
-use std::collections::{hash_map, HashMap, HashSet};
+use std::collections::{hash_map, HashMap};
 
 #[derive(Serialize, Deserialize)]
 pub struct Question {

@@ -36,25 +36,62 @@ impl Editor {
             ui.horizontal(|ui| {
                 ui.label("Tags");
                 if ui.button("+").clicked() {
-                    self.ghost_state = GhostState::TagGroup(String::new())
+                    self.ghost_state = GhostState::TagGroup(String::new(), None);
                 }
             });
 
+            let mut remove_group = None;
+
             for (name, tags) in question.groups_mut() {
                 ui.horizontal_wrapped(|ui| {
-                    let label = ui.label(name);
+                    let label = ui.button(name);
+                    
                     for tag in tags.iter() {
                         if ui.button(tag).clicked() {}
                     }
+
+                    if ui.button("+").clicked() {
+                        self.ghost_state = GhostState::Tag(String::new());
+                    }
+
+                    if let GhostState::Tag(text) = &mut self.ghost_state {
+                        let resp = ui.add(TextEdit::singleline(text));
+                        if resp.lost_focus() || ui.input().key_pressed(Key::Escape) {
+                            if !text.is_empty() {
+                                tags.insert(text.to_owned());
+                            }
+                            self.ghost_state = GhostState::Empty;
+                        }
+                        resp.request_focus();
+                    }
+                    
+                    label.context_menu(|ui| {
+                        if ui.button("Delete").clicked() {
+                            // Cant reborrow question mutably, so setup vars to remove after mut borrow
+                            remove_group = Some(name.clone());
+                        }
+                        if ui.button("Rename").clicked() {
+                            self.ghost_state = GhostState::TagGroup(name.clone(), Some(name.clone()));
+                        }
+                    });
+                    
                 });
             }
 
-            if let GhostState::TagGroup(text) = &mut self.ghost_state {
+            if let Some(removed_group_name) = &remove_group {
+                question.remove_group(removed_group_name);
+            }
+
+            if let GhostState::TagGroup(text, original) = &mut self.ghost_state {
                 let resp = ui.add(TextEdit::singleline(text));
 
                 if resp.lost_focus() || ui.input().key_pressed(Key::Escape) {
-                    if !text.is_empty() && !question.has_group(&text) {
-                        question.add_group(&text);
+                    if !text.is_empty() {
+                        if let Some(old_name) = original {
+                            question.rename_group(old_name, &text);
+                        } else if !question.has_group(&text) {
+                            question.add_group(&text);
+                        } 
                     }
                     self.ghost_state = GhostState::Empty;
                 }
@@ -128,6 +165,6 @@ enum GhostState {
     #[default]
     Empty,
     Sidebar(String),
-    TagGroup(String),
-    Tag(u32, String),
+    TagGroup(String, Option<String>),
+    Tag(String),
 }
