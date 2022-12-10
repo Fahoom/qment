@@ -1,10 +1,10 @@
-use indexmap::IndexMap;
+use indexmap::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};
 use std::collections::{hash_map, HashMap, HashSet};
 
 #[derive(Serialize, Deserialize)]
 pub struct Question {
-    groups: HashMap<String, HashSet<String>>,
+    groups: HashMap<String, IndexSet<String>>,
     sections: IndexMap<String, Section>,
 }
 
@@ -16,12 +16,22 @@ impl Question {
         }
     }
 
-    pub fn groups_mut(&mut self) -> hash_map::IterMut<String, HashSet<String>> {
+    pub fn groups_mut(&mut self) -> hash_map::IterMut<String, IndexSet<String>> {
         self.groups.iter_mut()
     }
 
     pub fn add_group(&mut self, name: &str) {
-        self.groups.insert(name.into(), HashSet::new());
+        self.groups.insert(name.into(), IndexSet::new());
+    }
+
+    pub fn rename_group(&mut self, old_name: &str, new_name: &str) -> Option<()> {
+        let old = self.groups.remove(old_name);
+        if let Some(hashset) = old {
+            self.groups.insert(new_name.into(), hashset);
+            Some(())
+        } else {
+            None
+        }
     }
 
     pub fn remove_group(&mut self, name: &str) {
