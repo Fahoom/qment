@@ -38,6 +38,10 @@ impl App {
             if ui.button("Save").clicked() {
                 self.save()
             }
+
+            if ui.button("Close").clicked() {
+                self.editor = None
+            }
         });
     }
 
