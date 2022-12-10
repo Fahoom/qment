@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use crate::document::Document;
-use eframe::egui::{CentralPanel, Key, SidePanel, TextEdit, TopBottomPanel, Ui};
+use eframe::egui::{CentralPanel, Key, SidePanel, TextEdit, TopBottomPanel, Ui, ScrollArea};
 
 pub struct Editor {
     pub document: Document,
@@ -123,38 +123,42 @@ impl Editor {
 
     pub fn draw_sidebar(&mut self, ui: &mut Ui) {
         TopBottomPanel::top("SidebarHeader").show_inside(ui, |ui| {
+            let highest = self.document.questions().fold(u32::MIN, |a,b| a.max(*b.0));
+
             ui.horizontal(|ui| {
                 ui.label("Questions");
 
                 if ui.button("+").clicked() {
-                    self.ghost_state = GhostState::Sidebar(String::new());
+                    self.ghost_state = GhostState::Sidebar((highest + 1).to_string());
                 }
             })
         });
 
         CentralPanel::default().show_inside(ui, |ui| {
-            ui.vertical(|ui| {
-                for (num, _) in self.document.questions() {
-                    if ui.button(num.to_string()).clicked() {
-                        self.current_question = Some(*num)
-                    }
-                }
-
-                // Ghost Rendering
-                if let GhostState::Sidebar(text) = &mut self.ghost_state {
-                    let resp = ui.add(TextEdit::singleline(text));
-
-                    if resp.lost_focus() || ui.input().key_pressed(Key::Escape) {
-                        if let Ok(num) = text.parse::<u32>() {
-                            self.document.add_question(num);
+            ScrollArea::vertical().show(ui, |ui| {
+                ui.vertical_centered_justified(|ui| {
+                    for (num, _) in self.document.questions() {
+                        if ui.button(num.to_string()).clicked() {
+                            self.current_question = Some(*num)
                         }
-
-                        self.ghost_state = GhostState::Empty;
                     }
-
-                    // Request after, otherwise we will never lose focus!
-                    resp.request_focus();
-                }
+    
+                    // Ghost Rendering
+                    if let GhostState::Sidebar(text) = &mut self.ghost_state {
+                        let resp = ui.add(TextEdit::singleline(text));
+    
+                        if resp.lost_focus() || ui.input().key_pressed(Key::Escape) {
+                            if let Ok(num) = text.parse::<u32>() {
+                                self.document.add_question(num);
+                            }
+    
+                            self.ghost_state = GhostState::Empty;
+                        }
+    
+                        // Request after, otherwise we will never lose focus!
+                        resp.request_focus();
+                    }
+                });
             });
         });
     }
