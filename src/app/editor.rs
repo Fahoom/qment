@@ -1,14 +1,16 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, rc::Rc};
 
-use crate::document::Document;
+use crate::document::{preset::Preset, question::Question, Document};
 use eframe::egui::{
-    Button, CentralPanel, Frame, Key, ScrollArea, Separator, SidePanel, TextEdit, TopBottomPanel,
-    Ui,
+    self, Button, CentralPanel, Frame, Key, ScrollArea, Separator, SidePanel, TextBuffer, TextEdit,
+    TopBottomPanel, Ui,
 };
 
 pub struct Editor {
     pub document: Document,
     pub path: PathBuf,
+
+    preset_ptr: Rc<Preset>,
 
     current_question: Option<u32>,
     current_section: Option<String>,
@@ -16,10 +18,11 @@ pub struct Editor {
 }
 
 impl Editor {
-    pub const fn new(document: Document, path: PathBuf) -> Self {
+    pub const fn new(document: Document, path: PathBuf, preset_ptr: Rc<Preset>) -> Self {
         Self {
             document,
             path,
+            preset_ptr,
             current_question: None,
             current_section: None,
             ghost_state: GhostState::Empty,
@@ -66,18 +69,36 @@ impl Editor {
                         }
 
                         if ui.button("+").clicked() {
-                            self.ghost_state = GhostState::Tag(String::new());
+                            self.ghost_state = GhostState::Tag(String::new(), name.to_string());
                         }
 
-                        if let GhostState::Tag(text) = &mut self.ghost_state {
-                            let resp = ui.add(TextEdit::singleline(text));
-                            if resp.lost_focus() || ui.input().key_pressed(Key::Escape) {
-                                if !text.is_empty() {
-                                    tags.insert(text.to_owned());
+                        if let GhostState::Tag(text, label) = &mut self.ghost_state {
+                            if label == name {
+                                let resp = ui.add(TextEdit::singleline(text));
+                                let popup_id = ui.make_persistent_id("TagPopup");
+
+                                if resp.secondary_clicked() {
+                                    ui.memory().toggle_popup(popup_id);
                                 }
-                                self.ghost_state = GhostState::Empty;
+
+                                egui::popup_below_widget(ui, popup_id, &resp, |ui| {
+                                    for tag in &self.preset_ptr.tags {
+                                        if ui.button(tag).clicked() {
+                                            TextBuffer::replace(text, tag);
+                                        }
+                                    }
+                                });
+
+                                if (resp.lost_focus() || ui.input().key_pressed(Key::Escape))
+                                    && !ui.memory().is_popup_open(popup_id)
+                                {
+                                    if !text.is_empty() {
+                                        tags.insert(text.to_owned());
+                                    }
+                                    self.ghost_state = GhostState::Empty;
+                                }
+                                resp.request_focus();
                             }
-                            resp.request_focus();
                         }
 
                         label.context_menu(|ui| {
@@ -168,7 +189,11 @@ impl Editor {
 
                         if resp.lost_focus() || ui.input().key_pressed(Key::Escape) {
                             if let Ok(num) = text.parse::<u32>() {
-                                self.document.add_question(num);
+                                let mut question = Question::default();
+                                for group in &self.preset_ptr.groups {
+                                    question.add_group(group);
+                                }
+                                self.document.add_question_with(num, question);
                             }
 
                             self.ghost_state = GhostState::Empty;
@@ -189,5 +214,7 @@ enum GhostState {
     Empty,
     Sidebar(String),
     TagGroup(String, Option<String>),
-    Tag(String),
+
+    // (Text Buffer, Tag Group Label)
+    Tag(String, String),
 }

@@ -1,4 +1,6 @@
-use crate::document::Document;
+use std::rc::Rc;
+
+use crate::document::{preset::Preset, Document};
 use eframe::{
     self,
     egui::{self, Context, Ui},
@@ -10,11 +12,15 @@ mod editor;
 
 pub struct App {
     editor: Option<Editor>,
+    preset: Rc<Preset>,
 }
 
 impl App {
-    pub const fn new() -> Self {
-        Self { editor: None }
+    pub fn new() -> Self {
+        Self {
+            editor: None,
+            preset: Rc::new(Preset::default()),
+        }
     }
 
     fn draw_content(&mut self, ui: &mut Ui) {
@@ -43,16 +49,45 @@ impl App {
                 self.editor = None
             }
         });
+
+        ui.menu_button("Presets", |ui| {
+            if ui.button("New Preset").clicked() {
+                let preset = Preset::default();
+                self.preset = Rc::new(preset);
+            }
+
+            if ui.button("Load Preset").clicked() {
+                if let Some(file_path) = rfd::FileDialog::new().pick_file() {
+                    if let Ok(text) = std::fs::read_to_string(&file_path) {
+                        if let Ok(preset) = serde_json::from_str::<Preset>(&text) {
+                            self.preset = Rc::new(preset);
+                        }
+                    }
+                }
+            }
+
+            if ui.button("Save Preset").clicked() {
+                if let Some(file_path) = rfd::FileDialog::new().save_file() {
+                    if let Ok(file) = std::fs::File::create(file_path) {
+                        if let Ok(_) = serde_json::to_writer_pretty(file, &Preset::default()) {
+                            // Tada!
+                        }
+                    }
+                }
+            }
+
+            ui.separator();
+        });
     }
 
-    fn draw_statusbar(&mut self, ui: &mut Ui) {}
+    fn draw_statusbar(&mut self, ui: &mut Ui) { }
 
     pub fn new_project(&mut self) {
         if let Some(file_path) = rfd::FileDialog::new()
             .add_filter("JSON", &["json"])
             .save_file()
         {
-            self.editor = Some(Editor::new(Document::new(), file_path));
+            self.editor = Some(Editor::new(Document::new(), file_path, self.preset.clone()));
         }
     }
 
@@ -63,7 +98,7 @@ impl App {
         {
             if let Ok(text) = std::fs::read_to_string(&file_path) {
                 if let Ok(document) = serde_json::from_str::<Document>(&text) {
-                    self.editor = Some(Editor::new(document, file_path));
+                    self.editor = Some(Editor::new(document, file_path, self.preset.clone()));
                 }
             }
         }

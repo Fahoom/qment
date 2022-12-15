@@ -2,7 +2,8 @@ use self::question::Question;
 use serde::{Deserialize, Serialize};
 use std::collections::{btree_map, BTreeMap};
 
-mod question;
+pub mod preset;
+pub mod question;
 
 #[derive(Serialize, Deserialize)]
 pub struct Document {
@@ -26,6 +27,10 @@ impl Document {
 
     pub fn add_question(&mut self, name: u32) {
         self.questions.insert(name, Question::default());
+    }
+
+    pub fn add_question_with(&mut self, name: u32, question: Question) {
+        self.questions.insert(name, question);
     }
 
     pub fn remove_question(&mut self, name: u32) {
