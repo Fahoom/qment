@@ -88,7 +88,7 @@ impl Editor {
                                                 TextBuffer::replace(text, tag);
                                             }
                                         }
-                                    } 
+                                    }
 
                                     if let Some(tags) = self.preset_ptr.tags.get("Global") {
                                         for tag in tags {
@@ -183,12 +183,21 @@ impl Editor {
                 }
             })
         });
+        let mut remove_question: Option<u32> = None;
 
         CentralPanel::default().show_inside(ui, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
                 ui.vertical_centered_justified(|ui| {
                     for (num, _) in self.document.questions() {
-                        if ui.button(num.to_string()).clicked() {
+                        if ui
+                            .button(num.to_string())
+                            .context_menu(|ui| {
+                                if ui.button("Delete").clicked() {
+                                    remove_question = Some(*num);
+                                }
+                            })
+                            .clicked()
+                        {
                             self.current_question = Some(*num)
                         }
                     }
@@ -215,6 +224,10 @@ impl Editor {
                 });
             });
         });
+
+        if let Some(remove_num) = remove_question {
+            self.document.remove_question(remove_num);
+        }
     }
 }
 

@@ -75,12 +75,10 @@ impl App {
                     }
                 }
             }
-
-            ui.separator();
         });
     }
 
-    fn draw_statusbar(&mut self, ui: &mut Ui) { }
+    fn draw_statusbar(&mut self, ui: &mut Ui) {}
 
     pub fn new_project(&mut self) {
         if let Some(file_path) = rfd::FileDialog::new()
