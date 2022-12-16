@@ -82,9 +82,19 @@ impl Editor {
                                 }
 
                                 egui::popup_below_widget(ui, popup_id, &resp, |ui| {
-                                    for tag in &self.preset_ptr.tags {
-                                        if ui.button(tag).clicked() {
-                                            TextBuffer::replace(text, tag);
+                                    if let Some(tags) = self.preset_ptr.tags.get(name) {
+                                        for tag in tags {
+                                            if ui.button(tag).clicked() {
+                                                TextBuffer::replace(text, tag);
+                                            }
+                                        }
+                                    } 
+
+                                    if let Some(tags) = self.preset_ptr.tags.get("Global") {
+                                        for tag in tags {
+                                            if ui.button(tag).clicked() {
+                                                TextBuffer::replace(text, tag);
+                                            }
                                         }
                                     }
                                 });
